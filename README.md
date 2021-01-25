@@ -19,10 +19,13 @@ One click Jenkins deployment in kubernetes cluster using helm with custom jenkin
 
 ```
 $ sudo su
-$ git clone <repo>
+$ git clone https://github.com/satender346/jenkins-kubernetes-helm-deployment.git
 $ cd jenkins-kubernetes-helm-deployment
  Note: you can update CPU, RAM, Volume, and Other configuration in values.yaml file
 $ ./deploy_jenkins_chart.sh
 ```
 
+```
+kubectl get service/jenkins -n jenkins
+```
 Jenkins UI can be access via node port IP or Ingress IP.
