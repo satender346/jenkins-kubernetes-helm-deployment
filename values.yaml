@@ -1,0 +1,440 @@
+# Copyright 2018 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+labels:
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  api:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  dind:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+
+images:
+  tags:
+    jenkins: jenkins/jenkins:2.263.2
+    ks_user: docker.io/openstackhelm/heat:ocata
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
+    image_repo_sync: docker.io/docker:17.07.0
+    namespace_creator: gcr.io/google_containers/hyperkube-amd64:v1.12.9
+    dind: docker.io/docker:18.09.0-dind
+  pull_policy: "IfNotPresent"
+  local_registry:
+    active: false
+    exclude:
+      - dep_check
+      - image_repo_sync
+
+jenkinsNodes:
+  namespace: jenkins-nodes
+  service:
+    namespace: openstack
+
+rbac:
+  create: true
+  role:
+    rules:
+    - apiGroups:
+      - ""
+      - extensions
+      - batch
+      - apps
+      resources:
+      - services
+      - endpoints
+      - jobs
+      verbs:
+      - get
+      - list
+    - apiGroups:
+      - ""
+      resources:
+      - pods/exec
+      verbs:
+      - get
+    - apiGroups:
+      - ""
+      resources:
+      - pods
+      verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - update
+
+pod:
+  mandatory_access_control:
+    type: apparmor
+    jenkins-api:
+      seed: runtime/default
+      jenkins: runtime/default
+    create-namespaces:
+      namespace-creator: runtime/default
+    dindproxy:
+      dindproxy: runtime/default
+  security_context:
+    jenkins:
+      pod:
+        runAsUser: 1000
+      container:
+        seed:
+          runAsUser: 0
+          readOnlyRootFilesystem: false
+        jenkins:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+  affinity:
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
+  mounts:
+    jenkins_api:
+      init_container: null
+      jenkins_api:
+  replicas:
+    api: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 10
+  resources:
+    enabled: true
+    api:
+      requests:
+        memory: "1024Mi"
+        cpu: "500m"
+      limits:
+        memory: "1024Mi"
+        cpu: "600m"
+    jobs:
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "500Mi"
+          cpu: "100m"
+
+plugins:
+  enabled: false
+  url: https://artifacts-nc.aic.atlantafoundry.com/cicd/jenkins
+
+# not all of these work in an entirely intuitive way, this can get
+# cleaned up once the toolkit is updated with a more generic mechanism
+conf:
+  config:
+    jenkins:
+      email:
+        enabled: false
+        suffix: null
+        host: null
+        charset: UTF-8
+        content_type: text/plain
+      active:
+        directory: active.directory.url
+      authorizationStrategy:
+        strategy: "hudson.security.FullControlOnceLoggedInAuthorizationStrategy"
+        denyAnonymousReadAccess: false
+        permissions: []
+# Global env variables in Jenkins configuration
+# Most of the below env values are just dummy
+      global_env_vars:
+        aiab_ref: master
+        aqua_haproxy_vip: 127.0.0.1
+        artf_api_url: https://$ARTF_WEB_URL/api/storage
+        artf_docker_url: artifacts-aic.atlantafoundry.com
+        artf_ip: 127.0.0.1
+        artf_secure_docker_url: docker-aic.atlantafoundry.com
+        artf_ubuntu_repo: ubuntu_repo_url
+        artf_web_url: artifacts-aic.atlantafoundry.com/artifactory
+        artifactory_env: stage/
+        artifacts_url: https://$ARTF_WEB_URL
+        cni_pod_cidr: 10.10.11.0/24
+        codecloud_ssh: review.gerrithub.io
+        conf_package_path: conf_path
+        cor_de_ldap_group:
+        corridor: tempcorridor
+        dns_server_one: 127.0.0.1
+        dns_server_two: 127.0.0.1
+        gerrit_ssh: ssh://jenkins@review.gerrithub.io:29418
+        http_proxy:
+        https_proxy:
+        no_proxy: localhost
+        internal_gerrit_key: jenkins-ssh-key
+        internal_gerrit_port: 29418
+        internal_gerrit_ssh: ssh://jenkins-attcomdev@10.24.20.18:29418
+        internal_gerrit_url: review.gerrithub.io
+        jenkins_cli: /home/jenkins/integration/jenkins-cli.jar
+        jenkins_cli_url: http://localhost:8081
+        known_hosts: 10.10.10.1
+        mirror_key: tempmirrorkey
+        mirror_key_orig: tempmirrorkeyorig
+        mirror_slave_ip: 127.0.0.1
+        nexus_url: 12.37.173.196:32775
+        os_auth_url: https://keystone.local/v3
+        os_keystone_image: docker-aic.atlantafoundry.com/openstackhelm/heat:ocata
+        os_project_name: jenkins
+        os_region_name: local
+        osh_br_ex_addr: 172.25.4.1/24
+        osh_ext_subnet: 172.25.4.0/24
+        pvc_backend: ceph
+        quay_url: quay.io
+        silent_mode: true
+        slack_default_channel: "#test-jenkins"
+        slack_url: https://att-comdev.slack.com/services/hooks/jenkins-ci/
+        ssh_data: tempsshdata
+    override: null
+  plugins:
+    override: null
+  security:
+    override: null
+  heat:
+    override: null
+  cli:
+    override: null
+  credentials:
+    passphrases:
+      entries:
+        jenkins-artifactory:
+          username: jenkins
+          password: password
+          description: This user is used only be Jenkins to push artifacts
+          scope: GLOBAL
+        jenkins-token:
+          username: jenkins
+          password: password
+          description: Jenkins token for VM creation
+          scope: GLOBAL
+    keys:
+      entries:
+        jenkins-ssh-key:
+          username: jenkins
+          description: Jenkins SSH key
+          scope: GLOBAL
+          passphrase: null
+          privateKey: null
+    override: null
+  jfrog:
+    override: null
+  global_libraries:
+    override: null
+    use_internal_lib: false
+    libraries:
+        upstream_lib:
+          name: cicd_upstream_libs
+          url: https://review.gerrithub.io/att-comdev/cicd
+          branch: master
+          credentials: null
+          shallow: true
+          noTags: false
+          reference: null
+          depth: 1
+          honorRefspec: false
+        internal_lib:
+          name: cicd_internal_libs
+          url: https://internal_url.com/cicd
+          branch: master
+          credentials: null
+          shallow: true
+          noTags: false
+          reference: null
+          depth: 1
+          honorRefspec: false
+  location_config:
+    override: null
+    enable: false
+    jenkinsUrl: null
+    email: null
+  gerrit_trigger:
+    override: null
+    enable: false
+    servers:
+      - name: "Gerrit-server"
+        gerrit_hostname: ""
+        gerrit_port: "29418"
+        gerrit_proxy: ""
+        gerrit_username: ""
+        gerrit_email: ""
+        gerrit_authkey: null
+        gerrit_authkey_path: ""
+        gerrit_authkey_password: ""
+        gerrit_frontend_url: ""
+        no_connection_on_startup: "false"
+        use_rest_api: "false"
+        rest_codereview: "false"
+        rest_verified: "fasle"
+        gerrit_verified_cmd_successful: null
+        gerrit_verified_cmd_unstable: null
+        gerrit_verified_cmd_failed: null
+        gerrit_verified_cmd_started: null
+        gerrit_verified_cmd_not_built: null
+        gerrit_build_started_verified: 0
+        gerrit_build_successful_verified: 1
+        gerrit_build_failed_verified: -1
+        gerrit_build_unstable_verified: 0
+        gerrit_build_not_built_verified: 0
+        gerrit_build_started_codereview: 0
+        gerrit_build_successful_codereview: 0
+        gerrit_build_failed_codereview: 0
+        gerrit_build_unstable_codereview: -1
+        gerrit_build_not_built_codereview: 0
+        enable_manual_trigger: "true"
+        enable_plugin_messages: "true"
+        trigger_on_all_comments: "false"
+        schedule_delay: "3"
+        dynamic_config_refresh_interval: "30"
+        project_auto_completion: "true"
+        project_list_fetch_interval: "3600"
+        project_list_fetch_delay: "0"
+        build_current_patches_only: "false"
+        abort_new_patch_sets: "false"
+        abort_manual_patch_sets: "false"
+        abort_same_topic: "false"
+
+ingress:
+  enabled: true
+  # Used to create an Ingress record.
+  hosts:
+  #  - jenkins.domain.example
+  annotations:
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  tls:
+  # Secrets must be manually created in the namespace.
+  # - secretName: chart-example-tls
+  #   hosts:
+  #     - jenkins.domain.example
+
+containers:
+  ports:
+    containerPort: 8080
+
+volume:
+  class_name: general
+  size: 1Gi
+
+ports:
+  http:
+    port: 8080
+    nodePort: 30081
+  slave:
+    port: 50000
+    nodePort: 30002
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: jenkins-keystone-admin
+    jenkins: jenkins-keystone-user
+  tls:
+    jenkins:
+      jenkins:
+        public: jenkins-tls-public
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  cluster_domain_suffix: cluster.local
+  identity:
+    name: keystone
+    namespace: null
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      jenkins:
+        role: admin
+        region_name: RegionOne
+        username: jenkins
+        password: password
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+    hosts:
+      default: keystone
+      internal: keystone-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 80
+        internal: 5000
+  cluster_domain_suffix: cluster.local
+  jenkins:
+    host_fqdn_override:
+      default: null
+    # NOTE(SaiBattina): this chart supports TLS for fqdn over-ridden public
+    # endpoints using the following format:
+    #   public:
+    #     host: jenkins.domain.example
+    #     tls:
+    #       crt: null
+    #       key: null
+    #       ca: null
+
+dependencies:
+  dynamic:
+    common:
+      local_image_registry:
+        jobs:
+          - jenkins-image-repo-sync
+        services:
+          - endpoint: node
+            service: local_image_registry
+  static:
+    ks_user:
+      services:
+        - service: identity
+          endpoint: internal
+    api:
+      jobs:
+        - jenkins-ks-user
+        - jenkins-ssh-key
+      services:
+        - service: identity
+          endpoint: internal
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  job_ks_user: false
+  secret_ingress_tls: true
+  job_create_namespaces: true
+  kubernetes_rbac_rule: true
+  configmap_init: true
