@@ -171,7 +171,7 @@ conf:
         artf_api_url: https://$ARTF_WEB_URL/api/storage
         artf_docker_url: artifacts-aic.atlantafoundry.com
         artf_ip: 127.0.0.1
-        artf_secure_docker_url: docker-aic.atlantafoundry.com
+        artf_secure_docker_url: harbor.kubernetes.demo
         artf_ubuntu_repo: ubuntu_repo_url
         artf_web_url: artifacts-aic.atlantafoundry.com/artifactory
         artifactory_env: stage/
