@@ -54,9 +54,15 @@ function display_jenkins_pods {
    kubectl get ingress -n jenkins
 }
 
+function create_jenkins_node {
+   echo "Creating jenkins executor"	
+   mkdir -p /mnt/data/nodes/dev
+   cp config.xml /mnt/data/nodes/dev/
+}
+
 function finish {
   node_ip=`kubectl get service/jenkins -n jenkins | awk '{print $3}' | tail -1`
-  echo "Jeknins UI will take some time to come up and will be avaiable at node $node_ip:8080"
+  printf "\n******************************************************************************************************************************************\nJeknins UI will take some time to come up and will be avaiable at node $node_ip:8080 or https://jenkins.kubernetes.demo/ \n******************************************************************************************************************************************"
 }
 
 
@@ -66,6 +72,7 @@ build_helm_infra_chart
 copy_infra_chart
 update_node_label
 create_jenkins_pv
-deploy_jenkins_chart
 display_jenkins_pods
+deploy_jenkins_chart
+create_jenkins_node
 finish
