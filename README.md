@@ -9,7 +9,7 @@ One click Jenkins deployment in kubernetes cluster using helm with custom jenkin
   - Default jenkins system configuration for cloud based deployment like Aritifactory/Harbor URL, Gerrit   URL, email configuration,
 
 # Requirements:
-  - Linux machine (Ubuntu prefered) with 5Gb ram, 50Gb storage and 2 CPU (Min.).
+  - Linux machine (Ubuntu prefered) with 5Gb ram, 50Gb storage and 1 CPU (Min.).
   - Helm 3
   - Kubernetes cluster.
   - Make
