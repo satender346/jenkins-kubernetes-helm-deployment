@@ -62,7 +62,9 @@ function create_jenkins_node {
 
 function finish {
   node_ip=`kubectl get service/jenkins -n jenkins | awk '{print $3}' | tail -1`
-  printf "\n******************************************************************************************************************************************\nJeknins UI will take some time to come up and will be avaiable at node $node_ip:8080 or https://jenkins.kubernetes.demo/ \n******************************************************************************************************************************************"
+  printf "\n******************************************************************************************************************************************\n"
+  echo "Jeknins UI will take ~5-10 mins time to come up and will be avaiable at node $node_ip:8080 or https://jenkins.kubernetes.demo/"
+  printf "\n******************************************************************************************************************************************\n"
 }
 
 
