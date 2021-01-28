@@ -128,10 +128,10 @@ pod:
     enabled: true
     api:
       requests:
-        memory: "4096Mi"
+        memory: "5120Mi"
         cpu: "1"
       limits:
-        memory: "4096Mi"
+        memory: "5120Mi"
         cpu: "1"
     jobs:
       ks_user:

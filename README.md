@@ -6,10 +6,10 @@ One click Jenkins deployment in kubernetes cluster using helm with custom jenkin
   - One click deployment
   - Preinstalled cloud and required plugins
   - Preconfigured Superseed job to create jenkins pipeline
-  - Default jenkins system configuration for cloud based deployment like Aritifactory URL, Gerrit   URL, email configuration,
+  - Default jenkins system configuration for cloud based deployment like Aritifactory/Harbor URL, Gerrit   URL, email configuration,
 
 # Requirements:
-  - Ubuntu 20 with 5Gb ram and 50Gb storage and 2 CPU (Min.).
+  - Linux machine (Ubuntu prefered) with 5Gb ram, 50Gb storage and 2 CPU (Min.).
   - Helm 3
   - Kubernetes cluster.
   - Make
