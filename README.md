@@ -9,7 +9,7 @@ One click Jenkins deployment in kubernetes cluster using helm with custom jenkin
   - Default jenkins system configuration for cloud based deployment like Aritifactory URL, Gerrit   URL, email configuration,
 
 # Requirements:
-  - Ubuntu 20 with 5Gb ram and 50Gb storage and 1 CPU (Min.).
+  - Ubuntu 20 with 5Gb ram and 50Gb storage and 2 CPU (Min.).
   - Helm 3
   - Kubernetes cluster.
   - Make
@@ -29,3 +29,8 @@ $ ./deploy_jenkins_chart.sh
 kubectl get service/jenkins -n jenkins
 ```
 Jenkins UI can be access via node port IP or Ingress IP.
+
+
+#### Demo
+
+See [Full Demo](https://satender346.wordpress.com/2021/01/25/jenkins-deployment-using-helm-in-kubernetes-cluster-with-custom-jenkins-configuration-and-plugin-installed/)

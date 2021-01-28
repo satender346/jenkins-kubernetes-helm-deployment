@@ -128,11 +128,11 @@ pod:
     enabled: true
     api:
       requests:
-        memory: "1024Mi"
-        cpu: "500m"
+        memory: "4096Mi"
+        cpu: "1"
       limits:
-        memory: "1024Mi"
-        cpu: "600m"
+        memory: "4096Mi"
+        cpu: "1"
     jobs:
       ks_user:
         requests:
@@ -171,7 +171,7 @@ conf:
         artf_api_url: https://$ARTF_WEB_URL/api/storage
         artf_docker_url: artifacts-aic.atlantafoundry.com
         artf_ip: 127.0.0.1
-        artf_secure_docker_url: docker-aic.atlantafoundry.com
+        artf_secure_docker_url: harbor.kubernetes.demo
         artf_ubuntu_repo: ubuntu_repo_url
         artf_web_url: artifacts-aic.atlantafoundry.com/artifactory
         artifactory_env: stage/
@@ -231,6 +231,16 @@ conf:
           username: jenkins
           password: password
           description: Jenkins token for VM creation
+          scope: GLOBAL
+        dev-server:
+          username: sy336r
+          password: ubuntu
+          description: dev server credentials
+          scope: GLOBAL
+        harbor-credentials:
+          username: admin
+          password: Harbor12345
+          description: Credentials for harbor registry
           scope: GLOBAL
     keys:
       entries:
